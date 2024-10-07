@@ -1,5 +1,10 @@
+package com.logistics.demo.controllers;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import com.logistics.demo.models.Truck;
+import com.logistics.demo.services.TruckService;
 
 import java.util.List;
 import java.util.Optional;
