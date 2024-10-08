@@ -63,7 +63,7 @@
                         truckDropdown.innerHTML = '';
                         data.forEach(truck => {
                             const option = document.createElement('option');
-                            option.value = truck.id;
+                            option.value = JSON.stringify(truck);
                             option.textContent = `${truck.make} ${truck.model}`;
                             truckDropdown.appendChild(option);
                         });
@@ -99,7 +99,7 @@
                         description: document.getElementById('description').value
                     },
                     status: document.getElementById('status').value,
-                    truck: { id: document.getElementById('truck').value }
+                    truck: JSON.parse(document.getElementById('truck').value)
                 };
 
                 fetch(API_BASE, {
