@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistics Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        input {
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Logistics Management</h1>
+
+    <!-- Form to add a new Truck -->
+    <section>
+        <h2>Create Truck</h2>
+        <form id="truck-form">
+            <label for="make">Make:</label>
+            <input type="text" id="make" required>
+            <label for="model">Model:</label>
+            <input type="text" id="model" required>
+            <label for="year">Year:</label>
+            <input type="number" id="year" required>
+            <label for="type">Type:</label>
+            <input type="text" id="type" required>
+            <label for="capacity">Capacity (tons):</label>
+            <input type="number" id="capacity" required>
+            <button type="submit">Add Truck</button>
+        </form>
+    </section>
+
+    <!-- List of Trucks -->
+    <section>
+        <h2>Trucks List</h2>
+        <ul id="truck-list"></ul>
+    </section>
+
+    <!-- JS -->
+    <script lang="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            const truckForm = document.getElementById('truck-form');
+            const truckList = document.getElementById('truck-list');
+
+            const API_BASE = '/trucks';  // API endpoint for trucks
+
+            // Fetch and display all trucks
+            function fetchTrucks() {
+                fetch(API_BASE)
+                    .then(response => response.json())
+                    .then(data => {
+                        truckList.innerHTML = '';
+                        data.forEach(truck => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <strong>${truck.make} ${truck.model}</strong> - ${truck.year}, ${truck.type}, ${truck.capacityTons} tons
+                                <button onclick="deleteTruck('${truck.id}')">Delete</button>
+                            `;
+                            truckList.appendChild(li);
+                        });
+                    });
+            }
+
+            // Create a new truck
+            truckForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const truckData = {
+                    make: document.getElementById('make').value,
+                    model: document.getElementById('model').value,
+                    year: parseInt(document.getElementById('year').value),
+                    type: document.getElementById('type').value,
+                    capacityTons: parseInt(document.getElementById('capacity').value)
+                };
+
+                fetch(API_BASE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(truckData)
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Truck added successfully!');
+                        fetchTrucks();
+                        truckForm.reset();
+                    } else {
+                        alert('Error adding truck');
+                    }
+                });
+            });
+
+            // Delete truck by ID
+            window.deleteTruck = function (id) {
+                if (confirm('Are you sure you want to delete this truck?')) {
+                    fetch(`${API_BASE}/${id}`, {
+                        method: 'DELETE',
+                    }).then(response => {
+                        if (response.ok) {
+                            alert('Truck deleted successfully!');
+                            fetchTrucks();
+                        } else {
+                            alert('Error deleting truck');
+                        }
+                    });
+                }
+            };
+
+            // Fetch all trucks on page load
+            fetchTrucks();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Routes</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { color: #333; }
+        form { margin-bottom: 20px; }
+        label { margin-right: 10px; }
+        input { margin-bottom: 10px; padding: 5px; }
+        button { padding: 5px 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        ul { list-style-type: none; padding: 0; }
+        li { background-color: #f9f9f9; margin: 10px 0; padding: 10px; border-radius: 5px; box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body>
+    <h1>Routes Management</h1>
+
+    <!-- Form to add a new Route -->
+    <section>
+        <h2>Create Route</h2>
+        <form id="route-form">
+            <label for="origin">Origin:</label>
+            <input type="text" id="origin" required>
+            <label for="destination">Destination:</label>
+            <input type="text" id="destination" required>
+            <label for="distanceKm">Distance (km):</label>
+            <input type="number" id="distanceKm" required>
+            <button type="submit">Add Route</button>
+        </form>
+    </section>
+
+    <!-- List of Routes -->
+    <section>
+        <h2>Routes List</h2>
+        <ul id="route-list"></ul>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const routeForm = document.getElementById('route-form');
+            const routeList = document.getElementById('route-list');
+            const API_BASE = '/routes';  // API endpoint for routes
+
+            // Fetch and display all routes
+            function fetchRoutes() {
+                fetch(API_BASE)
+                    .then(response => response.json())
+                    .then(data => {
+                        routeList.innerHTML = '';
+                        data.forEach(route => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <strong>Route:</strong> ${route.origin} -> ${route.destination}, ${route.distanceKm} km
+                                <button onclick="deleteRoute('${route.id}')">Delete</button>
+                            `;
+                            routeList.appendChild(li);
+                        });
+                    });
+            }
+
+            // Create a new route
+            routeForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const routeData = {
+                    origin: document.getElementById('origin').value,
+                    destination: document.getElementById('destination').value,
+                    distanceKm: parseInt(document.getElementById('distanceKm').value),
+                };
+
+                fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(routeData)
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Route added successfully!');
+                        fetchRoutes();
+                        routeForm.reset();
+                    } else {
+                        alert('Error adding route');
+                    }
+                });
+            });
+
+            // Delete route by ID
+            window.deleteRoute = function (id) {
+                if (confirm('Are you sure you want to delete this route?')) {
+                    fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('Route deleted successfully!');
+                                fetchRoutes();
+                            } else {
+                                alert('Error deleting route');
+                            }
+                        });
+                }
+            };
+
+            // Fetch all routes on page load
+            fetchRoutes();
+        });
+    </script>
+</body>
+</html>

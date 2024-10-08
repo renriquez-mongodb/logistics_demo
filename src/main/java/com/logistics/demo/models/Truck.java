@@ -14,5 +14,5 @@ public class Truck {
     private int year;
     private String type;
     private int capacityTons;
-    private Driver driver;
+    private TruckDriver driver;
 }

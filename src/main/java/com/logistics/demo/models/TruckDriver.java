@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Document(collection = "drivers")
-public class Driver {
+public class TruckDriver {
     @Id
     private String id;
     private String name;

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Shipments</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { color: #333; }
+        form { margin-bottom: 20px; }
+        label { margin-right: 10px; }
+        input { margin-bottom: 10px; padding: 5px; }
+        button { padding: 5px 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        ul { list-style-type: none; padding: 0; }
+        li { background-color: #f9f9f9; margin: 10px 0; padding: 10px; border-radius: 5px; box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body>
+    <h1>Shipments Management</h1>
+
+    <!-- Form to add a new Shipment -->
+    <section>
+        <h2>Create Shipment</h2>
+        <form id="shipment-form">
+            <label for="type">Load Type:</label>
+            <input type="text" id="type" required>
+            <label for="weightKg">Weight (kg):</label>
+            <input type="number" id="weightKg" required>
+            <label for="description">Description:</label>
+            <input type="text" id="description" required>
+            <label for="status">Status:</label>
+            <select id="status" required>
+                <option value="Pending">Pending</option>
+                <option value="In Transit">In Transit</option>
+                <option value="Delivered">Delivered</option>
+            </select>
+            <label for="truck">Truck:</label>
+            <select id="truck" required></select>
+            <button type="submit">Add Shipment</button>
+        </form>
+    </section>
+
+    <!-- List of Shipments -->
+    <section>
+        <h2>Shipments List</h2>
+        <ul id="shipment-list"></ul>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const shipmentForm = document.getElementById('shipment-form');
+            const shipmentList = document.getElementById('shipment-list');
+            const truckDropdown = document.getElementById('truck');
+            const API_BASE = '/shipments';  // API endpoint for shipments
+            const TRUCK_API = '/trucks';  // API endpoint for trucks (for dropdown)
+
+            // Fetch and display all trucks for dropdown
+            function fetchTrucks() {
+                fetch(TRUCK_API)
+                    .then(response => response.json())
+                    .then(data => {
+                        truckDropdown.innerHTML = '';
+                        data.forEach(truck => {
+                            const option = document.createElement('option');
+                            option.value = truck.id;
+                            option.textContent = `${truck.make} ${truck.model}`;
+                            truckDropdown.appendChild(option);
+                        });
+                    });
+            }
+
+            // Fetch and display all shipments
+            function fetchShipments() {
+                fetch(API_BASE)
+                    .then(response => response.json())
+                    .then(data => {
+                        shipmentList.innerHTML = '';
+                        data.forEach(shipment => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <strong>Shipment:</strong> ${shipment.loadDetails.type} (${shipment.loadDetails.weightKg} kg) - Status: ${shipment.status}
+                                <br><strong>Truck:</strong> ${shipment.truck.make} ${shipment.truck.model}
+                                <button onclick="deleteShipment('${shipment.id}')">Delete</button>
+                            `;
+                            shipmentList.appendChild(li);
+                        });
+                    });
+            }
+
+            // Create a new shipment
+            shipmentForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const shipmentData = {
+                    loadDetails: {
+                        type: document.getElementById('type').value,
+                        weightKg: parseInt(document.getElementById('weightKg').value),
+                        description: document.getElementById('description').value
+                    },
+                    status: document.getElementById('status').value,
+                    truck: { id: document.getElementById('truck').value }
+                };
+
+                fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(shipmentData)
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Shipment added successfully!');
+                        fetchShipments();
+                        shipmentForm.reset();
+                    } else {
+                        alert('Error adding shipment');
+                    }
+                });
+            });
+
+            // Delete shipment by ID
+            window.deleteShipment = function (id) {
+                if (confirm('Are you sure you want to delete this shipment?')) {
+                    fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('Shipment deleted successfully!');
+                                fetchShipments();
+                            } else {
+                                alert('Error deleting shipment');
+                            }
+                        });
+                }
+            };
+
+            // Fetch all trucks and shipments on page load
+            fetchTrucks();
+            fetchShipments();
+        });
+    </script>
+</body>
+</html>
