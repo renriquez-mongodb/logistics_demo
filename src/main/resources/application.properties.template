@@ -1,4 +1,4 @@
 spring.application.name=logistics-demo
 spring.data.mongodb.database=logistics
-spring.data.mongodb.uri=mongodb://username:password@localhost:27017
+spring.data.mongodb.uri=mongodb://localhost:27017
 spring.resources.static-locations=file:/var/www/static,classpath:static
